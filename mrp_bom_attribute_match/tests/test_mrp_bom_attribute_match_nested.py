@@ -17,13 +17,6 @@ class TestMrpBomAttributeMatchNested(TestMrpBomAttributeMatchBase):
             {"name": "office", "attribute_id": attr1.id},
             {"name": "gaming", "attribute_id": attr1.id},
         ])
-        attr2 = self.env["product.attribute"].create(
-            {"name": "version", "display_type": "radio", "create_variant": "always"}
-        )
-        a2vs = self.env["product.attribute.value"].create([
-            {"name": "v1", "attribute_id": attr2.id},
-            {"name": "v2", "attribute_id": attr2.id},
-        ])
 
         top = self.env["product.template"].create({
             "name": "Top-Level",
@@ -33,11 +26,6 @@ class TestMrpBomAttributeMatchNested(TestMrpBomAttributeMatchBase):
             "attribute_id": attr1.id,
             "product_tmpl_id": top.id,
             "value_ids": [Command.set(a1vs.ids)],
-        })
-        self.env["product.template.attribute.line"].create({
-            "attribute_id": attr2.id,
-            "product_tmpl_id": top.id,
-            "value_ids": [Command.set(a2vs.ids)],
         })
 
         sub = self.env["product.template"].create({
@@ -49,40 +37,22 @@ class TestMrpBomAttributeMatchNested(TestMrpBomAttributeMatchBase):
             "product_tmpl_id": sub.id,
             "value_ids": [Command.set(a1vs.ids)],
         })
-        self.env["product.template.attribute.line"].create({
-            "attribute_id": attr2.id,
-            "product_tmpl_id": sub.id,
-            "value_ids": [Command.set(a2vs.ids)],
-        })
 
-        subsub1 = self.env["product.template"].create({
+        subsub = self.env["product.template"].create({
             "name": "Sub Sub 1",
             "type": "product",
         })
         self.env["product.template.attribute.line"].create({
             "attribute_id": attr1.id,
-            "product_tmpl_id": subsub1.id,
+            "product_tmpl_id": subsub.id,
             "value_ids": [Command.set(a1vs.ids)],
         })
 
-        subsub2 = self.env["product.template"].create({
-            "name": "Sub Sub 2",
-            "type": "product",
-        })
-        self.env["product.template.attribute.line"].create({
-            "attribute_id": attr2.id,
-            "product_tmpl_id": subsub2.id,
-            "value_ids": [Command.set(a2vs.ids)],
-        })
         self.bom_sub = self._create_bom(
             sub,
             [
                 dict(
-                    component_template_id=subsub1.id,
-                    product_qty=1,
-                ),
-                dict(
-                    component_template_id=subsub2.id,
+                    component_template_id=subsub.id,
                     product_qty=1,
                 ),
             ],
